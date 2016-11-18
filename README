@@ -12,6 +12,16 @@ DESCRIPTION
     Actually, it can be used to setup tunnels for any TCP services,
     but my use case is email.
 
+    It accepts a single action argument:
+
+        * start - Create the tunnel.
+
+        * stop - Terminate the running tunnel.
+
+        * restart - Terminate any running tunnel, then start a new one.
+
+        * status - Show whether the tunnel is running.
+
     The following packages must be installed on the local system:
 
         * daemon
@@ -38,7 +48,7 @@ FILES
     $HOME/var/run/email-tunnel.pid
         PID of (last) running ssh process that creates the tunnel.
 
-    $HOMEHOME/var/log/email-tunnel.log
+    $HOME/var/log/email-tunnel.log
         Output from the ssh process the creates the tunnel.
 
 BUGS
