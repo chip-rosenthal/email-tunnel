@@ -35,10 +35,10 @@ OPTIONS
     -h    Display this help message.
 
 FILES
-    /home/crosenthal/var/run/email-tunnel.pid
+    $HOME/var/run/email-tunnel.pid
         PID of (last) running ssh process that creates the tunnel.
 
-    /home/crosenthal/var/log/email-tunnel.log
+    $HOMEHOME/var/log/email-tunnel.log
         Output from the ssh process the creates the tunnel.
 
 BUGS

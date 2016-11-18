@@ -61,10 +61,10 @@ OPTIONS
     -h    Display this help message.
 
 FILES
-    $HOME/var/run/email-tunnel.pid
+    \$HOME/var/run/email-tunnel.pid
         PID of (last) running ssh process that creates the tunnel.
 
-    $HOME/var/log/email-tunnel.log
+    \$HOMEHOME/var/log/email-tunnel.log
         Output from the ssh process the creates the tunnel.
 
 BUGS
