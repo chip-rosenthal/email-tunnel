@@ -26,7 +26,10 @@ DESCRIPTION
           LocalForward    4143 mail.soaustin.net:143
           LocalForward    4587 mail.soaustin.net:587
 
-    In this example, I am setting up two tunnels for IMAP and SMTP/submission services on mail.soaustin.net. The tunnels run through an ssh session to shell.soaustin.net, upon which I have a login account.
+    In this example, I am setting up two tunnels for IMAP and
+    SMTP/submission services on mail.soaustin.net. The tunnels run
+    through an ssh session to shell.soaustin.net, upon which I have a
+    login account.
 
 OPTIONS
     -h    Display this help message.
@@ -49,5 +52,5 @@ AUTHOR
 
 UNLICENSE
     This is free and unencumbered software released into the public domain.
-    See https://raw.githubusercontent.com/chip-rosenthal/unplus-maildir/master/LICENSE
+    See https://raw.githubusercontent.com/chip-rosenthal/email-tunnel/master/LICENSE
 
