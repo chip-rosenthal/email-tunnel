@@ -39,7 +39,7 @@ FILES
         Output from the ssh process the creates the tunnel.
 
 BUGS
-    TODO
+    Outbound filters on POP/IMAP/Submission are stupid.
 
 AUTHOR
     Chip Rosenthal
