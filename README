@@ -1,0 +1,53 @@
+NAME
+    email-tunnel - Create a tunnel to get email services (POP/IMAP/SMTP) through outbound firewall filters.
+
+SYNOPSIS
+    email-tunnel [-h] {start|stop|restart|status}
+
+DESCRIPTION
+    The email-tunnel utility creates a tunnel to get email services
+    (POP/IMAP/SMTP) through outbound firewall filters. It uses the
+    LocalForward feature of ssh.
+
+    Actually, it can be used to setup tunnels for any TCP services,
+    but my use case is email.
+
+    The following packages must be installed on the local system:
+
+        * daemon
+        * ssh
+
+    To use this utility, you will need to create an "email-tunnel"
+    entry in your .ssh/config file. Something like:
+
+        Host            email-tunnel
+          HostName        shell.soaustin.net
+          User            chip
+          LocalForward    4143 mail.soaustin.net:143
+          LocalForward    4587 mail.soaustin.net:587
+
+    In this example, I am setting up two tunnels for IMAP and SMTP/submission services on mail.soaustin.net. The tunnels run through an ssh session to shell.soaustin.net, upon which I have a login account.
+
+OPTIONS
+    -h    Display this help message.
+
+FILES
+    /home/crosenthal/var/run/email-tunnel.pid
+        PID of (last) running ssh process that creates the tunnel.
+
+    /home/crosenthal/var/log/email-tunnel.log
+        Output from the ssh process the creates the tunnel.
+
+BUGS
+    TODO
+
+AUTHOR
+    Chip Rosenthal
+    <chip@unicom.com>
+
+    This package is published at: https://github.com/chip-rosenthal/email-tunnel
+
+UNLICENSE
+    This is free and unencumbered software released into the public domain.
+    See https://raw.githubusercontent.com/chip-rosenthal/unplus-maildir/master/LICENSE
+

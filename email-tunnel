@@ -1,0 +1,222 @@
+#!/bin/bash
+#
+# email-tunnel - Create a tunnel to get email services (POP/IMAP/SMTP) through outbound firewall filters.
+#
+# Run with the "-h" option for help.
+
+set -e
+NAME=`basename $0`
+SYNOPSIS="$0 [-h] {start|stop|restart|status}"
+
+die() {
+    echo "$0: $@" >&2
+    exit 1
+}
+
+info() {
+    echo "$@" >&2
+}
+
+usage_error() {
+    echo "usage: $SYNOPSIS (try \"-h\" for help)" >&2
+    exit 1
+}
+
+show_help() {
+  ${PAGER:-less} <<_EOT_
+NAME
+    email-tunnel - Create a tunnel to get email services (POP/IMAP/SMTP) through outbound firewall filters.
+
+SYNOPSIS
+    $SYNOPSIS
+
+DESCRIPTION
+    The email-tunnel utility creates a tunnel to get email services
+    (POP/IMAP/SMTP) through outbound firewall filters. It uses the
+    LocalForward feature of ssh.
+
+    Actually, it can be used to setup tunnels for any TCP services,
+    but my use case is email.
+
+    The following packages must be installed on the local system:
+
+        * daemon
+        * ssh
+
+    To use this utility, you will need to create an "email-tunnel"
+    entry in your .ssh/config file. Something like:
+
+        Host            email-tunnel
+          HostName        shell.soaustin.net
+          User            chip
+          LocalForward    4143 mail.soaustin.net:143
+          LocalForward    4587 mail.soaustin.net:587
+
+    In this example, I am setting up two tunnels for IMAP and SMTP/submission services on mail.soaustin.net. The tunnels run through an ssh session to shell.soaustin.net, upon which I have a login account.
+
+OPTIONS
+    -h    Display this help message.
+
+FILES
+    $HOME/var/run/email-tunnel.pid
+        PID of (last) running ssh process that creates the tunnel.
+
+    $HOME/var/log/email-tunnel.log
+        Output from the ssh process the creates the tunnel.
+
+BUGS
+    TODO
+
+AUTHOR
+    Chip Rosenthal
+    <chip@unicom.com>
+
+    This package is published at: https://github.com/chip-rosenthal/email-tunnel
+
+UNLICENSE
+    This is free and unencumbered software released into the public domain.
+    See https://raw.githubusercontent.com/chip-rosenthal/unplus-maildir/master/LICENSE
+
+_EOT_
+}
+
+# Calculate the dirname of a path, like the dirname(1) command.
+dirname() {
+    if [ $# -ne 1 ] ; then
+        die "usage: dirname DIR"
+    fi
+    echo "${1%/*}"
+}
+
+
+# Calculate the basename of a path, like the basename(1) command.
+basename() {
+    if [ $# -ne 1 ] ; then
+        die "usage: basename DIR"
+    fi
+    echo "${1##*/}"
+}
+
+
+# Check that directory exists, create it if missing.
+check_directory() {
+    if [ $# -ne 1 ] ; then
+        die "usage: check_directory DIR"
+    fi
+    local dir="$1"
+    if [ ! -d "$dir" ] ; then
+        info "Creating directory \"$dir\" ..."
+        mkdir "$dir"
+    fi
+}
+
+
+
+PIDFILE=$HOME/var/run/$NAME.pid
+check_directory `dirname $PIDFILE`
+
+LOGFILE=$HOME/var/log/$NAME.log
+check_directory `dirname $LOGFILE`
+
+
+perform_start()
+{
+    if perform_check ; then
+        die "ERROR - service \"$NAME\" is already running"
+    fi
+    info "Starting service \"$NAME\" ..."
+    daemon \
+        --name=$NAME \
+        --pidfile=$PIDFILE \
+        --errlog=$LOGFILE \
+        --output=$LOGFILE \
+        --respawn \
+        -- \
+        ssh -N -v email-tunnel
+}
+
+
+perform_stop()
+{
+    if perform_check ; then
+            : nop
+    else
+        die "ERROR - service \"$NAME\" is not running"
+    fi
+    info "Stopping service \"$NAME\" ..."
+    daemon \
+        --name=$NAME \
+        --pidfile=$PIDFILE \
+        --stop
+}
+
+
+perform_check()
+{
+    daemon \
+        --name=$NAME \
+        --pidfile=$PIDFILE \
+        --running
+}
+
+
+perform_status()
+{
+    daemon \
+        --name=$NAME \
+        --pidfile=$PIDFILE \
+        --verbose=99 --running
+}
+
+##############################################################################
+
+while getopts 'hn' opt ; do
+    case "$opt" in
+    h) show_help ; exit 0 ;;
+    *) usage_error ;;
+  esac
+done
+shift $((OPTIND-1))
+
+if (( $# != 1 )) ; then
+    usage_error
+fi
+
+Action="$1"
+
+case "$Action" in
+
+start)
+    perform_start
+    ;;
+
+stop)
+    perform_stop
+    ;;
+
+status)
+    perform_status
+    exit 0 # to skip final message
+    ;;
+
+restart)
+    if perform_check ; then
+        perform_stop
+        sleep 3
+    else
+        info "Service \"$NAME\" currently is not running."
+    fi
+    perform_start
+    ;;
+
+*)
+    usage_error
+    ;;
+
+esac
+
+if perform_check ; then
+    info "Service \"$NAME\" is running."
+else
+    info "Service \"$NAME\" is stopped"
+fi
